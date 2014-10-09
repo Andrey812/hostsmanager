@@ -16,7 +16,7 @@ void err(char *err_str) {
 int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
     FILE *fp;
     int status;
-    char str[255];
+    char str[256];
 
     fp = popen(cmd_string, "r");
 
@@ -24,7 +24,7 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
         err("Can't execute external program");
 
     int str_num = 0;
-    while (fgets(str, 255, fp) != NULL)
+    while (fgets(str, 256, fp) != NULL)
     {
         int len;
         len = strlen(str);
@@ -48,34 +48,34 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
     return 1;
 }
 
-/* make cmd string from template and attributes */
+/* Construct command string from template using array of attributes */
 void make_cmd(char *cmd_tpl, char *attrs[], char *cmd)
 {
-    //TODO: Make buf size depending from length of cmd_tpl and attrs
-    char buf[255];
+    int i_tpl = 0;
+    int i_cmd = 0;
 
-    int i = 0;
-    int i_buf = 0;
-    while(cmd_tpl[i] != '\0')
+    while(cmd_tpl[i_tpl] != '\0')
     {
-        if (cmd_tpl[i] == '{' && cmd_tpl[i+2] == '}')
+        if (cmd_tpl[i_tpl] == '{' && cmd_tpl[i_tpl+2] == '}')
         {
-            char *curr_attr = attrs[atoi(&cmd_tpl[i+1])];
-            int ca_i = 0;
-            while (curr_attr[ca_i] != '\0') {
-                buf[i_buf] = curr_attr[ca_i];
-                ca_i++;
-                i_buf++;
-            }
-            i = i + 3;
-        }
-        buf[i_buf] = cmd_tpl[i];
-        i++;
-        i_buf++;
-    }
-    buf[i_buf] = '\0';
+            char *curr_attr = attrs[atoi(&cmd_tpl[i_tpl+1])];
 
-    strcpy(cmd, buf);
+            int ca_i = 0;
+
+            while (curr_attr[ca_i] != '\0') {
+                cmd[i_cmd] = curr_attr[ca_i];
+                ca_i++;
+                i_cmd++;
+            }
+            i_tpl = i_tpl + 3;
+        }
+
+        cmd[i_cmd] = cmd_tpl[i_tpl];
+        i_tpl++;
+        i_cmd++;
+    }
+
+    cmd[i_cmd] = '\0';
 }
 
 /*
@@ -90,14 +90,14 @@ int ping(char *host) {
     // Build ping command string with attributes
     char *cmd_tpl = "ping {0} -c 2";
     char *cmd_attrs[] = {host};
-    char cmd[255];
+    char cmd[256];
 
     make_cmd(cmd_tpl, cmd_attrs, cmd);
 
     // Execute ping command and get answer
     char *ping_answ[32];
     int *ping_answ_str_cnt;
-    ping_answ_str_cnt = malloc(sizeof(int));
+    *ping_answ_str_cnt = 0;
 
     exec_cmd(cmd, ping_answ, ping_answ_str_cnt);
 
@@ -129,14 +129,14 @@ int ver(char *host)
     // Build get version command string
     char *cmd_tpl = "sshpass -p raidix ssh -t root@{0} 'rpm -qa | grep raidix' 2>/dev/null";
     char *cmd_attrs[] = {host};
-    char cmd[255];
+    char cmd[256];
 
     make_cmd(cmd_tpl, cmd_attrs, cmd);
 
     // Execute version command and get answer
     char *ver_answ[32];
     int *ver_answ_str_cnt;
-    ver_answ_str_cnt = malloc(sizeof(int));
+    *ver_answ_str_cnt = 0;
 
     exec_cmd(cmd, ver_answ, ver_answ_str_cnt);
 
@@ -157,26 +157,67 @@ int ver(char *host)
     return 1;
 }
 
+/* Global structure with info about each host */
+struct host {
+    char *name[256];
+    char *ip[16];
+};
+
+struct host hosts[5];
+
+/* Read and parse configuration file. Get info about host IP adresses and names */
+void read_cfg()
+{
+    FILE *fp;
+
+    char row[256];              // Current row from config file
+    char host_name[256];        // Buf for current host name
+    char host_ip_address[16];   // Buf for current fost ip address
+
+    fp = fopen("hosts.cfg", "r");
+
+    if (!fp)
+            err("Can't find configuration file");
+
+    // Parse config file
+    while (fgets(row, 256, fp)!=NULL)
+    {
+        if (!memcmp(row, "NAME", 4)) {
+            strcpy(host_name, &row[5]);
+            printf("%s", host_name);
+        };
+    };
+
+    fclose(fp);
+}
+
+
 void main()
 {
-    char hosts[8][20]; // The list of ip adresses
 
-    int host_num;
-    int ping_result;
+    /*
+    *hosts[0].name = "host_1";
+    *hosts[0].ip = "172.16.4.118";
 
-    //strcpy(hosts[0],"172.16.20.146");
-    //strcpy(hosts[1],"172.16.20.150");
-    //strcpy(hosts[2],"172.16.4.118");
+    *hosts[1].name = "host_2";
+    *hosts[1].ip = "172.16.4.118";
 
-    strcpy(hosts[0], "172.16.4.118");
+    *hosts[2].name = "host_3";
+    *hosts[2].ip = "172.16.4.118";
+    */
 
-    ver(hosts[0]);
+    read_cfg();
 
+    //printf("%s\n", *hosts[2].ip);
+
+/*
     while(strlen(hosts[host_num]))
     {
-        //printf("Ping result of %s : %d\n", hosts[host_num], ping(hosts[host_num]));
+        printf("Ping result of %s : %d\n", hosts[host_num], ping(hosts[host_num]));
 
         host_num++;
     };
+*/
 }
+
 
