@@ -1,0 +1,15 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+closeApp	tst.c	/^void closeApp(GtkWidget *widget, gpointer data)$/;"	f
+err	daemon.c	/^void err(char *err_str) {$/;"	f
+exec_cmd	daemon.c	/^int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {$/;"	f
+main	c_checker.c	/^void main()$/;"	f
+main	daemon.c	/^void main()$/;"	f
+main	tst.c	/^int main (int argc, char *argv[])$/;"	f
+make_cmd	daemon.c	/^void make_cmd(char *cmd_tpl, char *attrs[], char *cmd)$/;"	f
+ping	daemon.c	/^int ping(char *host) {$/;"	f
+ver	daemon.c	/^int ver(char *host)$/;"	f
