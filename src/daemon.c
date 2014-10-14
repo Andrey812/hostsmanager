@@ -3,6 +3,25 @@
 #include <string.h>
 #include <regex.h>
 
+/* Global structure with info about each host */
+struct host
+{
+    // Params from config
+    char *cfg_name;     // Name from configuration file
+    char *ip;           // IP from cinfiguration file
+
+    // Results of scan
+    int ping;              // Ping result 0 or 1
+    char km_ver_maj;       // KM version major ("4.2.0")
+    char km_ver_min;       // KM version minor ("178")
+    char core_ver_maj;     // CORE version major ("4.2.0")
+    char core_ver_min;     // CORE version minor ("657")
+    char ui_ver_maj;       // UI version major ("4.2.0")
+    char ui_ver_min;       // UI version minor ("251")
+    char hostname;         // Received hostname
+};
+struct host hosts[16];
+
 /* Process errors (Prints error message to STDERR and exit */
 void err(char *err_str) {
     fprintf(stderr, "Error happened: '%s'\n", err_str);
@@ -96,10 +115,9 @@ int ping(char *host) {
 
     // Execute ping command and get answer
     char *ping_answ[32];
-    int *ping_answ_str_cnt;
-    *ping_answ_str_cnt = 0;
+    int ping_answ_str_cnt = 0;
 
-    exec_cmd(cmd, ping_answ, ping_answ_str_cnt);
+    exec_cmd(cmd, ping_answ, &ping_answ_str_cnt);
 
     // Parse ping answer
     regex_t regex; //regex for parsing of the ping answer
@@ -107,12 +125,17 @@ int ping(char *host) {
     if (reg_err)
         err("Could not compile regex");
 
-    for (str_num = 0; str_num < *ping_answ_str_cnt; str_num++)
+    for (str_num = 0; str_num < ping_answ_str_cnt; str_num++)
     {
         reg_ret = regexec(&regex, ping_answ[str_num], 0, NULL, 0);
+
+        free(ping_answ[str_num]);
+
         if (!reg_ret)
             return 1;
+
     };
+
 
     return 0;
 }
@@ -122,9 +145,9 @@ Return:
 0 - Can't take a version
 1 - Version detected
 */
-int ver(char *host)
+void ver(char *host, int host_num)
 {
-    int reg_ret, str_num, reg_err;
+    int str_num;
 
     // Build get version command string
     char *cmd_tpl = "sshpass -p raidix ssh -t root@{0} 'rpm -qa | grep raidix' 2>/dev/null";
@@ -135,44 +158,38 @@ int ver(char *host)
 
     // Execute version command and get answer
     char *ver_answ[32];
-    int *ver_answ_str_cnt;
-    *ver_answ_str_cnt = 0;
+    int ver_answ_str_cnt = 0;
 
-    exec_cmd(cmd, ver_answ, ver_answ_str_cnt);
+    exec_cmd(cmd, ver_answ, &ver_answ_str_cnt);
 
     // Parse version answer
     regex_t regex;
-    reg_err = regcomp(&regex, "time=", 0);
-    if (reg_err)
-        err("Could not compile regex");
+    regcomp(&regex, "raidix-core", 0); //CORE
 
-    for (str_num = 0; str_num < *ver_answ_str_cnt; str_num++)
+    for (str_num = 0; str_num < ver_answ_str_cnt; str_num++)
     {
-        printf("%s\n", ver_answ[str_num]);
-        //reg_ret = regexec(&regex, ping_answ[str_num], 0, NULL, 0);
-        //if (!reg_ret)
-        //    return 0;
+        // Drop '\n' symbol
+        ver_answ[str_num][strlen(ver_answ[str_num])-1] = '\0';
+
+        if (!regexec(&regex, ver_answ[str_num], 0, NULL, 0))
+        {
+            //strncpy(&hosts[host_num].core_ver_maj, &ver_answ[str_num][12], 5);
+            strncpy(&hosts[host_num].core_ver_min, &ver_answ[str_num][18], 3);
+            //printf("%s\n", &hosts[host_num].core_ver_maj);
+            printf("%s\n", &hosts[host_num].core_ver_min);
+        }
+
+        free(ver_answ[str_num]);
     };
-
-    return 1;
 }
-
-/* Global structure with info about each host */
-struct host {
-    char *name[256];
-    char *ip[16];
-};
-
-struct host hosts[5];
 
 /* Read and parse configuration file. Get info about host IP adresses and names */
 void read_cfg()
 {
     FILE *fp;
 
-    char row[256];              // Current row from config file
-    char host_name[256];        // Buf for current host name
-    char host_ip_address[16];   // Buf for current fost ip address
+    char row[256];      // Current row of the config file
+    int host_num = 0;   // Current number of the host
 
     fp = fopen("hosts.cfg", "r");
 
@@ -182,42 +199,75 @@ void read_cfg()
     // Parse config file
     while (fgets(row, 256, fp)!=NULL)
     {
-        if (!memcmp(row, "NAME", 4)) {
-            strcpy(host_name, &row[5]);
-            printf("%s", host_name);
+        // Info about every host must be separated by one empty line
+        if (row[0] == '\n')
+            host_num++;
+
+        // Drop last '\n' char
+        row[strlen(row)-1] = '\0';
+
+        // Drop commented row
+        if (row[0] == '#') {
+            //commented line
+        }
+
+        // Extract NAME field
+        else if (!memcmp(row, "NAME", 4))
+        {
+            hosts[host_num].cfg_name = (char *)malloc(strlen(&row[5])+1);
+            strcpy(hosts[host_num].cfg_name, &row[5]);
+        }
+
+        // Extract IP field
+        else if (!memcmp(row, "IP", 2))
+        {
+            hosts[host_num].ip = (char *)malloc(strlen(&row[3])+1);
+            strcpy(hosts[host_num].ip, &row[3]);
         };
     };
 
     fclose(fp);
 }
 
+/* The test functon for show of info about hosts */
+void show_info()
+{
+    int host_num = 0;
+    while(hosts[host_num].cfg_name != NULL)
+    {
+        printf("Id: %d\n", host_num);
+        printf("Host: %s\n", hosts[host_num].cfg_name);
+        printf("IP: %s\n", hosts[host_num].ip);
+        printf("Ping: %d\n", hosts[host_num].ping);
+
+        printf("\n");
+        host_num++;
+    }
+}
 
 void main()
 {
-
-    /*
-    *hosts[0].name = "host_1";
-    *hosts[0].ip = "172.16.4.118";
-
-    *hosts[1].name = "host_2";
-    *hosts[1].ip = "172.16.4.118";
-
-    *hosts[2].name = "host_3";
-    *hosts[2].ip = "172.16.4.118";
-    */
-
+    // Get info about hosts from configuration file
     read_cfg();
 
-    //printf("%s\n", *hosts[2].ip);
-
-/*
-    while(strlen(hosts[host_num]))
+    int host_num = 0;
+    while(hosts[host_num].cfg_name != NULL)
     {
-        printf("Ping result of %s : %d\n", hosts[host_num], ping(hosts[host_num]));
+        // Ping
+        hosts[host_num].ping = ping(hosts[host_num].ip);
+
+        if (hosts[host_num].ping)
+        {
+        }
+
+        ver(hosts[host_num].ip, host_num);
 
         host_num++;
     };
-*/
+
+    show_info();
 }
+
+
 
 
