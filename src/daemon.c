@@ -11,14 +11,14 @@ struct host
     char *ip;           // IP from cinfiguration file
 
     // Results of scan
-    int ping;              // Ping result 0 or 1
-    char km_ver_maj;       // KM version major ("4.2.0")
-    char km_ver_min;       // KM version minor ("178")
-    char core_ver_maj;     // CORE version major ("4.2.0")
-    char core_ver_min;     // CORE version minor ("657")
-    char ui_ver_maj;       // UI version major ("4.2.0")
-    char ui_ver_min;       // UI version minor ("251")
-    char hostname;         // Received hostname
+    int ping;               // Ping result 0 or 1
+    char km_ver_maj[64];    // KM version major ("4.2.0")
+    char km_ver_min[64];    // KM version minor ("178")
+    char core_ver_maj[64];  // CORE version major ("4.2.0")
+    char core_ver_min[64];  // CORE version minor ("657")
+    char ui_ver_maj[64];    // UI version major ("4.2.0")
+    char ui_ver_min[64];    // UI version minor ("251")
+    char hostname[255];     // Received hostname
 };
 struct host hosts[16];
 
@@ -97,6 +97,53 @@ void make_cmd(char *cmd_tpl, char *attrs[], char *cmd)
     cmd[i_cmd] = '\0';
 }
 
+/* Parse Raidix version string and return major and minor
+    parts of the version
+    Example: raidix-core-4.2.0-657
+    Type: core (km, ui)
+    Major string: 4.2.0
+    Minor string: 657
+*/
+void extr_versions(char *str, char *type, char *maj, char *min)
+{
+    int i_str       = 0;    // Counter for index of the char of the version string
+    int cnt_dash    = 0;    // Counter of the dashes in the version string ('-')
+    int cnt_point   = 0;    // Counter of the points in the version string ('.')
+
+    int i_type      = 0;    // Index of the char of type string
+    int i_min       = 0;    // Index of the char of min string
+    int i_maj       = 0;    // Index of the char of maj string
+
+    while(str[i_str] != '\0')
+    {
+        if (str[i_str] == '-')
+            cnt_dash++;
+
+        else if (str[i_str] == '.')
+            cnt_point++;
+
+        // Type
+        if (cnt_dash == 1 && cnt_point == 0 && str[i_str] != '-')
+            type[i_type++] = str[i_str];
+
+        // Major
+        else if(cnt_dash == 2 && cnt_point < 3 && str[i_str] != '-')
+        {
+            maj[i_maj++] = str[i_str];
+        }
+        else if(cnt_dash == 2 && cnt_point > 2 && str[i_str] != '.')
+        {
+            min[i_min++] = str[i_str];
+        }
+
+        i_str++;
+    }
+
+    type[i_type++] = '\0';
+    maj[i_maj++] = '\0';
+    min[i_min++] = '\0';
+}
+
 /*
     Process ping and extract result
     Returns:
@@ -162,21 +209,29 @@ void ver(char *host, int host_num)
 
     exec_cmd(cmd, ver_answ, &ver_answ_str_cnt);
 
-    // Parse version answer
-    regex_t regex;
-    regcomp(&regex, "raidix-core", 0); //CORE
-
     for (str_num = 0; str_num < ver_answ_str_cnt; str_num++)
     {
-        // Drop '\n' symbol
-        ver_answ[str_num][strlen(ver_answ[str_num])-1] = '\0';
+        // Type (km, core, ui), maj and min parts of version
+        char type[32] = "", maj[32] = "", min[32] = "";
 
-        if (!regexec(&regex, ver_answ[str_num], 0, NULL, 0))
+        extr_versions(ver_answ[str_num], type, maj, min);
+
+        if (!strcmp(type, "km"))
         {
-            //strncpy(&hosts[host_num].core_ver_maj, &ver_answ[str_num][12], 5);
-            strncpy(&hosts[host_num].core_ver_min, &ver_answ[str_num][18], 3);
-            //printf("%s\n", &hosts[host_num].core_ver_maj);
-            printf("%s\n", &hosts[host_num].core_ver_min);
+            strcpy(hosts[host_num].km_ver_maj, maj);
+            strcpy(hosts[host_num].km_ver_min, min);
+        }
+
+        else if (!strcmp(type, "core"))
+        {
+            strcpy(hosts[host_num].core_ver_maj, maj);
+            strcpy(hosts[host_num].core_ver_min, min);
+        }
+
+        else if (!strcmp(type, "ui"))
+        {
+            strcpy(hosts[host_num].ui_ver_maj, maj);
+            strcpy(hosts[host_num].ui_ver_min, min);
         }
 
         free(ver_answ[str_num]);
@@ -240,6 +295,10 @@ void show_info()
         printf("IP: %s\n", hosts[host_num].ip);
         printf("Ping: %d\n", hosts[host_num].ping);
 
+        printf("KM: %s [%s]\n", hosts[host_num].km_ver_maj, hosts[host_num].km_ver_min);
+        printf("CORE: %s [%s]\n", hosts[host_num].core_ver_maj, hosts[host_num].core_ver_min);
+        printf("UI: %s [%s]\n", hosts[host_num].ui_ver_maj, hosts[host_num].ui_ver_min);
+
         printf("\n");
         host_num++;
     }
@@ -255,10 +314,6 @@ void main()
     {
         // Ping
         hosts[host_num].ping = ping(hosts[host_num].ip);
-
-        if (hosts[host_num].ping)
-        {
-        }
 
         ver(hosts[host_num].ip, host_num);
 
