@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <regex.h>
 
 #include "../include/flow.h"
 #include "../include/cmd.h"
