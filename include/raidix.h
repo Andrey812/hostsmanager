@@ -23,7 +23,5 @@ struct host
 };
 struct host hosts[16];
 
-void err(char *err_str);
-
 void extr_versions(char *str, char *type, char *maj, char *min);
 void ver(char *host, int host_num);
