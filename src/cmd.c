@@ -21,7 +21,7 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
     fp = popen(cmd_string, "r");
 
     if (fp == NULL)
-        err("Can't execute external program");
+        wlog("Can't execute external program", 0);
 
     int str_num = 0;
     while (fgets(str, 256, fp) != NULL)
@@ -41,7 +41,7 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
 
     if (status == -1)
     {
-        err("Can't close external program");
+        wlog("Can't close external program", 0);
         return 0;
     }
 

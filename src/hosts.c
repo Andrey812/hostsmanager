@@ -21,7 +21,7 @@ void read_cfg()
     fp = fopen("hosts.cfg", "r");
 
     if (!fp)
-            err("Can't find configuration file");
+            err("Can't find configuration file: hosts.cfg");
 
     // Parse config file
     while (fgets(row, 256, fp)!=NULL)
