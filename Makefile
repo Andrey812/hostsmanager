@@ -12,4 +12,4 @@ all: src/cmd.c
 
 clean:
 	rm $(OBJ_DIR)*.o
-	rm $(BIN_DIR)*
+	rm $(BIN_DIR)daemon

@@ -51,26 +51,6 @@ int ping(char *host) {
     return 0;
 }
 
-/* The test functon for show of info about hosts */
-void show_info()
-{
-    int host_num = 0;
-    while(hosts[host_num].cfg_name != NULL)
-    {
-        printf("Id: %d\n", host_num);
-        printf("Host: %s\n", hosts[host_num].cfg_name);
-        printf("IP: %s\n", hosts[host_num].ip);
-        printf("Ping: %d\n", hosts[host_num].ping);
-
-        printf("KM: %s [%s]\n", hosts[host_num].km_ver_maj, hosts[host_num].km_ver_min);
-        printf("CORE: %s [%s]\n", hosts[host_num].core_ver_maj, hosts[host_num].core_ver_min);
-        printf("UI: %s [%s]\n", hosts[host_num].ui_ver_maj, hosts[host_num].ui_ver_min);
-
-        printf("\n");
-        host_num++;
-    }
-}
-
 void main()
 {
     // Get info about hosts from configuration file
@@ -84,10 +64,10 @@ void main()
 
         ver(hosts[host_num].ip, host_num);
 
+        save_host_info(host_num);
+
         host_num++;
     };
-
-    show_info();
 }
 
 
