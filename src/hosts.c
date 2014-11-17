@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <dirent.h>
+
+#include "../include/cmd.h"
 #include "../include/raidix.h"
 #include "../include/hosts.h"
 
@@ -83,3 +86,13 @@ void save_host_info(int host_id)
 
     fclose(fp);
 }
+
+/* Delete all hosts files */
+void clean_hosts_info()
+{
+    char *exec_answ[32];
+    int exec_answ_str_cnt = 0;
+
+	exec_cmd("rm *.info", exec_answ, &exec_answ_str_cnt);
+}
+

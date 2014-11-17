@@ -34,7 +34,7 @@ void wlog(char *log_str, int log_type) {
 void err(char *err_str) {
     fprintf(stderr, "Error happened: '%s'\n", err_str);
     wlog(err_str, 0);
-    exit(0);
+    exit(1);
 }
 
 

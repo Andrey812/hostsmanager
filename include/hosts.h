@@ -7,3 +7,4 @@
 /* Global structure with info about each host */
 void read_cfg();
 void save_host_info(int);
+void clean_hosts();

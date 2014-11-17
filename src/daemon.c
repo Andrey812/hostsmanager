@@ -38,6 +38,9 @@ void main()
     // Get info about hosts from configuration file
     read_cfg();
 
+	// Delete exists info files
+	clean_hosts_info();
+
     /* Daemonize process */
     pid_t process_id = 0;
     pid_t sid = 0;
@@ -46,19 +49,16 @@ void main()
     process_id = fork();
 
     if (process_id < 0)
-    {
-        err("Fork failed!");
-        exit(1);
-    }
+		err("Fork failed!");
 
     // PARENT PROCESS. Must be killed
     if (process_id > 0)
     {
         char started_msg[32];
-        sprintf(started_msg, "Daemon started with pid: %d", process_id);
+        sprintf(started_msg, "Daemon has started with pid: %d", process_id);
         wlog(started_msg, 1);
 
-        printf("Daemon started (pid: %d)\n", process_id);
+        printf("Daemon has started (pid: %d)\n", process_id);
         exit(0);
     }
 
@@ -68,22 +68,25 @@ void main()
 
     /* Child process - "Daemon" code started from here */
 
-    int host_num = 0;
-    while(hosts[host_num].cfg_name != NULL)
-    {
-        // Ping
-        hosts[host_num].ping = ping(hosts[host_num].ip);
+	while(1)
+	{
+		int host_num = 0;
+		while(hosts[host_num].cfg_name != NULL)
+		{
+			// Ping
+			hosts[host_num].ping = ping(hosts[host_num].ip);
 
-        // Check version
-        ver(hosts[host_num].ip, host_num);
+			// Check version
+			ver(hosts[host_num].ip, host_num);
 
-        // Save result about host to the file
-        save_host_info(host_num);
+			// Save result about host to the file
+			save_host_info(host_num);
 
-        host_num++;
-    };
+			host_num++;
+		};
+	};
 
-    wlog("Daemon finished work", 1);
+    wlog("Daemon has finished work", 1);
 }
 
 
