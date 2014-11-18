@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "../include/raidix.h"
 
 /* Parse Raidix version string and return major and minor
@@ -105,3 +106,20 @@ void ver(char *host, int host_num)
     };
 }
 
+void refresh_info_file(FILE *fp, int host_id) {
+    fprintf(fp, "HOST=%s\n", hosts[host_id].cfg_name);
+    fprintf(fp, "IP=%s\n",   hosts[host_id].ip);
+    fprintf(fp, "PING=%d\n", hosts[host_id].ping);
+
+    fprintf(fp, "KM_VER_MAJ=%s\n", hosts[host_id].km_ver_maj);
+    fprintf(fp, "KM_VER_MIN=%s\n", hosts[host_id].km_ver_min);
+
+    fprintf(fp, "CORE_VER_MAJ=%s\n", hosts[host_id].core_ver_maj);
+    fprintf(fp, "CORE_VER_MIN=%s\n", hosts[host_id].core_ver_min);
+
+    fprintf(fp, "UI_VER_MAJ=%s\n", hosts[host_id].ui_ver_maj);
+    fprintf(fp, "UI_VER_MIN=%s\n", hosts[host_id].ui_ver_min);
+
+    fprintf(fp, "UPDATETIME=%ld\n", time(NULL));
+
+}

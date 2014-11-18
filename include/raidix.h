@@ -25,3 +25,4 @@ struct host hosts[16];
 
 void extr_versions(char *str, char *type, char *maj, char *min);
 void ver(char *host, int host_num);
+void refresh_info_file(FILE *fp, int host_id);
