@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use 5.010;
+
+use Gtk2;
+
+sub delete_event {
+    Gtk2->main_quit;
+    return 0;
+}
+
+Gtk2->init;
+
+my $window = Gtk2::Window->new('toplevel');
+$window->set_title("Hosts manager");
+$window->signal_connect(delete_event => \&delete_event);
+
+my $hbox   = Gtk2::VBox->new;
+
+my $lb1 = Gtk2::Label->new('Label_1');
+my $lb2 = Gtk2::Label->new('Label_2');
+
+$hbox->pack_start($lb1, 0, 0, 0);
+$hbox->pack_start($lb2, 0, 0, 0);
+
+$lb1->show;
+$lb2->show;
+
+$window->add($hbox);
+$window->show_all;
+
+my $hosts = collect_hosts_info();
+
+use Data::Dumper;
+warn Dumper($hosts);
+
+Gtk2->main;
+
+exit(0);
+
+# Get info about scanned hosts from files
+sub collect_hosts_info {
+    my %hosts;
+    my $info_files = get_info_files_list();
+
+    foreach my $fl_name (@$info_files) {
+        my ($host_id, $host_info) = get_host_info($fl_name);
+        $hosts{$host_id} = $host_info;
+    };
+
+    return \%hosts;
+}
+
+# Return list of the host info files
+sub get_info_files_list {
+    my @files_list;
+
+    opendir(DIR, './') or die $!;
+
+    while (my $file = readdir(DIR)) {
+
+        # Use a regular expression to ignore files beginning with a period
+        next if ($file =~ m/^\./ || $file !~ /^host_\d+\.info/);
+        push @files_list, $file;
+    }
+
+    closedir(DIR);
+
+    return \@files_list;
+}
+
+# Get info about host
+sub get_host_info {
+    my ($info_file_name) = @_;
+
+    my %host_info;
+
+    my ($host_id) = $info_file_name =~ /^host_(\d+)/;
+
+    open(my $fh, '<', $info_file_name)
+        or die "Could not open file '$info_file_name' $!";
+
+    while (my $row = <$fh>) {
+        chomp $row;
+        if ($row =~ /^(.+)=(.+)$/) {
+            $host_info{$1} = $2;
+        }
+    }
+
+    return($host_id, \%host_info);
+}
