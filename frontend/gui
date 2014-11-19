@@ -6,6 +6,7 @@ use warnings;
 use 5.010;
 
 use Gtk2;
+use Gtk2::SimpleList;
 
 sub delete_event {
     Gtk2->main_quit;
@@ -16,30 +17,62 @@ Gtk2->init;
 
 my $window = Gtk2::Window->new('toplevel');
 $window->set_title("Hosts manager");
+$window->set_border_width(5);
 $window->signal_connect(delete_event => \&delete_event);
 
-my $hbox   = Gtk2::VBox->new;
 
-my $lb1 = Gtk2::Label->new('Label_1');
-my $lb2 = Gtk2::Label->new('Label_2');
+# List
+my $hosts_list = Gtk2::SimpleList->new (
+                'ID'            => 'text',
+                'Hostname'      => 'text',
+                'IP address'    => 'text',
+                'Ping'          => 'text',
+                'KM'            => 'text',
+                'CORE'          => 'text',
+                'UI'            => 'text',
+                'Monit'         => 'text',
+                'rdcmd'         => 'text',
+                'rdscan'        => 'text',
+                'rdhb'          => 'text',
+                'rdnotify'      => 'text',
+              );
 
-$hbox->pack_start($lb1, 0, 0, 0);
-$hbox->pack_start($lb2, 0, 0, 0);
+# Frame
+my $hosts_list_frame = Gtk2::Frame->new('Hosts');
 
-$lb1->show;
-$lb2->show;
+# Add Hosts list to frame
+$hosts_list_frame->add($hosts_list);
 
-$window->add($hbox);
+$window->add($hosts_list_frame);
 $window->show_all;
 
 my $hosts = collect_hosts_info();
-
-use Data::Dumper;
-warn Dumper($hosts);
+display_hosts_info($hosts_list, $hosts);
 
 Gtk2->main;
 
 exit(0);
+
+# Show hosts info table
+sub display_hosts_info {
+    my ($hosts_list, $hosts_info) = @_;
+
+    foreach my $host_id (sort keys %$hosts_info) {
+
+        my $host = $hosts_info->{$host_id};
+
+        $hosts_list->{data}->[$host_id] = [
+            $host_id,
+            $host->{'HOST'},
+            $host->{'IP'},
+            $host->{'PING'} ? "Yes" : "No",
+            $host->{KM_VER_MAJ} ? ($host->{'KM_VER_MAJ'} . "." . $host->{'KM_VER_MIN'}) : "",
+            $host->{CORE_VER_MAJ} ? ($host->{'CORE_VER_MAJ'} . "." . $host->{'CORE_VER_MIN'}) : "",
+            $host->{UI_VER_MAJ} ? ($host->{'UI_VER_MAJ'} . "." . $host->{'UI_VER_MIN'}) : "",
+            undef, undef, undef, undef, undef
+        ];
+    };
+}
 
 # Get info about scanned hosts from files
 sub collect_hosts_info {
