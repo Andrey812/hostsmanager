@@ -63,7 +63,7 @@ sub display_hosts_info {
 
         $hosts_list->{data}->[$host_id] = [
             $host_id,
-            $host->{'HOST'},
+            $host->{'HOSTNAME'},
             $host->{'IP'},
             $host->{'PING'} ? "Yes" : "No",
             $host->{KM_VER_MAJ} ? ($host->{'KM_VER_MAJ'} . "." . $host->{'KM_VER_MIN'}) : "",

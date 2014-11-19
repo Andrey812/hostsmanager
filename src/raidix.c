@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include "../include/raidix.h"
+#include "../include/flow.h"
 
 /* Parse Raidix version string and return major and minor
 parts of the version
@@ -83,7 +84,6 @@ void ver(char *host, int host_num)
         char type[32] = "", maj[32] = "", min[32] = "";
 
         extr_versions(ver_answ[str_num], type, maj, min);
-
         if (!strcmp(type, "km"))
         {
             strcpy(hosts[host_num].km_ver_maj, maj);
@@ -106,7 +106,28 @@ void ver(char *host, int host_num)
     };
 }
 
-void refresh_info_file(FILE *fp, int host_id) {
+void hostname(char *host, int host_num)
+{
+    int str_num;
+
+    char *cmd_tpl = "sshpass -p raidix ssh -t root@{0} 'hostname' 2>/dev/null";
+    char *cmd_attrs[] = {host};
+    char cmd[256];
+
+    make_cmd(cmd_tpl, cmd_attrs, cmd);
+
+    char *hm_answ[256];
+    int hm_answ_str_cnt = 0;
+
+    exec_cmd(cmd, hm_answ, &hm_answ_str_cnt);
+
+    strcpy(hosts[host_num].hostname, hm_answ[0]);
+
+    free(hm_answ[0]);
+}
+
+void refresh_info_file(FILE *fp, int host_id)
+{
     fprintf(fp, "HOST=%s\n", hosts[host_id].cfg_name);
     fprintf(fp, "IP=%s\n",   hosts[host_id].ip);
     fprintf(fp, "PING=%d\n", hosts[host_id].ping);
@@ -119,6 +140,7 @@ void refresh_info_file(FILE *fp, int host_id) {
 
     fprintf(fp, "UI_VER_MAJ=%s\n", hosts[host_id].ui_ver_maj);
     fprintf(fp, "UI_VER_MIN=%s\n", hosts[host_id].ui_ver_min);
+    fprintf(fp, "HOSTNAME=%s\n", hosts[host_id].hostname);
 
     fprintf(fp, "UPDATETIME=%ld\n", time(NULL));
 

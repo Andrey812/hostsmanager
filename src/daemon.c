@@ -79,6 +79,9 @@ void main()
 			// Check version
 			ver(hosts[host_num].ip, host_num);
 
+            // Get hostname
+            hostname(hosts[host_num].ip, host_num);
+
 			// Save result about host to the file
 			save_host_info(host_num);
 

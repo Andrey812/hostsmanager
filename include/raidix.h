@@ -19,10 +19,11 @@ struct host
     char core_ver_min[64];  // CORE version minor ("657")
     char ui_ver_maj[64];    // UI version major ("4.2.0")
     char ui_ver_min[64];    // UI version minor ("251")
-    char hostname[255];     // Received hostname
+    char hostname[256];     // Received hostname
 };
 struct host hosts[16];
 
 void extr_versions(char *str, char *type, char *maj, char *min);
 void ver(char *host, int host_num);
+void hostname(char *host, int host_num);
 void refresh_info_file(FILE *fp, int host_id);
