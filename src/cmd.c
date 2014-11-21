@@ -8,6 +8,8 @@
 
 #include "../include/flow.h"
 #include "../include/cmd.h"
+#include "../include/hosts.h"
+#include "../include/builtin_cmd.h"
 
 /*
     Execute external command and return array of strings
@@ -78,3 +80,25 @@ void make_cmd(char *cmd_tpl, char *attrs[], char *cmd)
     cmd[i_cmd] = '\0';
 }
 
+/* Execute list of commands and save answers */
+void execute_scan_rules(int host_num)
+{
+    int rn = 0; // Number of the rule in the rules list
+
+	while(scan_rules[rn].cmd != NULL)
+    {
+
+        // Buildin command "ping"
+        if (!memcmp(scan_rules[rn].cmd, "_ping", 5))
+        {
+            scan_rules[rn].res = (char *)malloc(2);
+            sprintf(scan_rules[rn].res, "%d", ping(hosts[host_num].ip));
+        }
+
+        // These command will be executed on the remote node
+        else
+        {
+        }
+        rn++;
+    };
+}

@@ -1,5 +1,5 @@
 /*
-    Prepared base external commands for remote node
+    Prepared commands for local host
 */
 
 #include <stdio.h>
@@ -9,7 +9,7 @@
 
 #include "../include/flow.h"
 #include "../include/cmd.h"
-#include "../include/remote_cmd.h"
+#include "../include/builtin_cmd.h"
 
 /*
     Process ping and extract result

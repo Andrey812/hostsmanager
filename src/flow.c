@@ -36,5 +36,3 @@ void err(char *err_str) {
     wlog(err_str, 0);
     exit(1);
 }
-
-
