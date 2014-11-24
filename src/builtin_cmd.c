@@ -21,7 +21,7 @@ int ping(char *host) {
     int reg_ret, str_num, reg_err;
 
     // Build ping command string with attributes
-    char *cmd_tpl = "ping {0} -c 2";
+    char *cmd_tpl = "ping {0} -c 2 -W 4";
     char *cmd_attrs[] = {host};
     char cmd[256];
 

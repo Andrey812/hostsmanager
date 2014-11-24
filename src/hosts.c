@@ -151,16 +151,16 @@ void refresh_info_file(FILE *fp, int host_id)
     while(scan_rules[rn].cmd != NULL)
     {
         // 1 - field name, 2 - value
-        if (scan_rules[rn].res != NULL)
+        if (strlen(scan_rules[rn].res) != 0)
+        {
             fprintf(fp, "%s=%s\n", scan_rules[rn].res_field, scan_rules[rn].res);
-
-        // Clear memory for the next iteration
-        free(scan_rules[rn].res);
+            sprintf(scan_rules[rn].res, "%s", "");
+        }
 
         rn++;
     };
 
-    fprintf(fp, "IP=%s\n", hosts[host_id].ip);
-    fprintf(fp, "UPDATETIME=%ld\n", time(NULL));
+    fprintf(fp, "ip=%s\n", hosts[host_id].ip);
+    fprintf(fp, "updatetime=%ld\n", time(NULL));
 }
 

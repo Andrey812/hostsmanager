@@ -20,7 +20,7 @@ struct scan_rule
 {
     char *cmd;          // Builtin command or bash scanner command
     char *res_field;    // Result field name of the executed command
-    char *res;          // Result string (will be returned from executed command)
+    char res[256];      // Result string (will be returned from executed command)
     int  blk;           // Blocking or unblocking command (depending from result)
 };
 

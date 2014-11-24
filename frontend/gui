@@ -30,11 +30,6 @@ my $hosts_list = Gtk2::SimpleList->new (
                 'KM'            => 'text',
                 'CORE'          => 'text',
                 'UI'            => 'text',
-                'Monit'         => 'text',
-                'rdcmd'         => 'text',
-                'rdscan'        => 'text',
-                'rdhb'          => 'text',
-                'rdnotify'      => 'text',
               );
 
 # Frame
@@ -63,13 +58,12 @@ sub display_hosts_info {
 
         $hosts_list->{data}->[$host_id] = [
             $host_id,
-            $host->{'HOSTNAME'},
-            $host->{'IP'},
-            $host->{'PING'} ? "Yes" : "No",
-            $host->{KM_VER_MAJ} ? ($host->{'KM_VER_MAJ'} . "." . $host->{'KM_VER_MIN'}) : "",
-            $host->{CORE_VER_MAJ} ? ($host->{'CORE_VER_MAJ'} . "." . $host->{'CORE_VER_MIN'}) : "",
-            $host->{UI_VER_MAJ} ? ($host->{'UI_VER_MAJ'} . "." . $host->{'UI_VER_MIN'}) : "",
-            undef, undef, undef, undef, undef
+            $host->{'hostname'},
+            $host->{'ip'},
+            $host->{'ping'},
+            $host->{'km_ver'},
+            $host->{'core_ver'},
+            $host->{'ui_ver'},
         ];
     };
 }

@@ -1,5 +1,5 @@
 /*
-    Functions for processing external commands
+    Functions for processing the external commands
 */
 
 #include <stdio.h>
@@ -11,10 +11,7 @@
 #include "../include/hosts.h"
 #include "../include/builtin_cmd.h"
 
-/*
-    Execute external command and return array of strings
-    with answer
-*/
+/* Execute external command and return array of strings with answer */
 int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
     FILE *fp;
     int status;
@@ -85,20 +82,66 @@ void execute_scan_rules(int host_num)
 {
     int rn = 0; // Number of the rule in the rules list
 
+    char cmd[256];
+    char *hm_answ[256]; // Array of the strings
+    int hm_answ_str_cnt;
+    int mem_clr_i;
+
 	while(scan_rules[rn].cmd != NULL)
     {
+        hm_answ_str_cnt = 0;
 
         // Buildin command "ping"
         if (!memcmp(scan_rules[rn].cmd, "_ping", 5))
         {
-            scan_rules[rn].res = (char *)malloc(2);
-            sprintf(scan_rules[rn].res, "%d", ping(hosts[host_num].ip));
+            int ping_result = ping(hosts[host_num].ip);
+            hm_answ_str_cnt = ping_result;
+            sprintf(scan_rules[rn].res, "%d", ping_result);
         }
 
         // These command will be executed on the remote node
         else
         {
+            if (hosts[host_num].login != NULL && hosts[host_num].password != NULL)
+            {
+                sprintf(cmd, "sshpass -p %s ssh -o ConnectTimeout=10 -t %s@%s '%s' 2>/dev/null",
+                    hosts[host_num].password,
+                    hosts[host_num].login,
+                    hosts[host_num].ip,
+                    scan_rules[rn].cmd
+                );
+            }
+            else
+            {
+                sprintf(cmd, "ssh -o ConnectTimeout=10 -t %s '%s' 2>/dev/null",
+                    hosts[host_num].ip,
+                    scan_rules[rn].cmd
+                );
+            }
+
+            exec_cmd(cmd, hm_answ, &hm_answ_str_cnt);
+
+            if (hm_answ_str_cnt > 0)
+            {
+                // Drop last '\n' char
+                hm_answ[0][strlen(hm_answ[0])-1] = '\0';
+
+                // Write result
+                sprintf(scan_rules[rn].res, "%s", hm_answ[0]);
+
+                // Clear used memory
+                for (mem_clr_i = 0; mem_clr_i < hm_answ_str_cnt; mem_clr_i++)
+                {
+                    free(hm_answ[mem_clr_i]);
+                }
+            }
         }
+
+        // Drop execution of the rules list for current host
+        // if current rule returned nothing and it has active blk flag
+        if (hm_answ_str_cnt == 0 && scan_rules[rn].blk == 1)
+            return;
+
         rn++;
     };
 }

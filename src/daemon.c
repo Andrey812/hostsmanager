@@ -7,11 +7,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/file.h>
 
 #include "../include/flow.h"
 #include "../include/cmd.h"
 #include "../include/hosts.h"
-/*
+
 int is_pid_file_exists()
 {
     int pid_file = open("hostmon.pid", O_CREAT | O_RDWR, 0666);
@@ -24,12 +25,11 @@ int is_pid_file_exists()
             return 0;
     }
 };
-*/
 
 void main()
 {
-//    if (is_pid_file_exists())
-//        err("Daemon is already running");
+    if (is_pid_file_exists())
+        err("Daemon is already running");
 
     // Read the main configuration file
     read_cfg();
@@ -37,35 +37,35 @@ void main()
 	// Delete exists info files
 	clean_hosts_info();
 
-    /* Daemonize process */
-    //pid_t process_id = 0;
-    //pid_t sid = 0;
+    // Daemonize process
+    pid_t process_id = 0;
+    pid_t sid = 0;
 
     // Create child process
-    //process_id = fork();
+    process_id = fork();
 
-    //if (process_id < 0)
-	//	err("Fork failed!");
+    if (process_id < 0)
+	    err("Fork failed!");
 
     // PARENT PROCESS. Must be killed
-    //if (process_id > 0)
-    //{
-    //    char started_msg[32];
-    //    sprintf(started_msg, "Daemon has started with pid: %d", process_id);
-    //    wlog(started_msg, 1);
+    if (process_id > 0)
+    {
+        char started_msg[32];
+        sprintf(started_msg, "Daemon has started with pid: %d", process_id);
+        wlog(started_msg, 1);
 
-    //    printf("Daemon has started (pid: %d)\n", process_id);
-    //    exit(0);
-    //}
+        printf("Daemon has started (pid: %d)\n", process_id);
+        exit(0);
+    }
 
-    //close(STDIN_FILENO);
-    //close(STDOUT_FILENO);
-    //close(STDERR_FILENO);
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
     /* Child process - "Daemon" code started from here */
 
-	//while(1)
-	//{
+	while(1)
+	{
 		int host_num = 0;
 		while(hosts[host_num].ip != NULL)
 		{
@@ -74,7 +74,7 @@ void main()
 
 			host_num++;
 		};
-	//};
+	};
 
     wlog("Daemon has finished work", 1);
 }
