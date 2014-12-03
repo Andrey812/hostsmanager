@@ -23,6 +23,9 @@ void wlog(char *log_str, int log_type) {
             break;
         case 1 :
             sprintf(type, "%s", "INFO");
+            break;
+        case 2 :
+            sprintf(type, "%s", "DEBUG");
     };
 
     fp = fopen("hostmon.log", "a");

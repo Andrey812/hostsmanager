@@ -22,6 +22,7 @@ struct scan_rule
     char *res_field;    // Result field name of the executed command
     char res[256];      // Result string (will be returned from executed command)
     int  blk;           // Blocking or unblocking command (depending from result)
+    int  loc;           // Execute such shell command on the local host
 };
 
 // Up to 32 scanner commands

@@ -44,6 +44,14 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
         return 0;
     }
 
+    wlog(cmd_string, 2);
+    if (str_num) {
+        wlog(cmd_answ[0], 2);
+    }
+    else {
+        wlog("NO_ANSWER", 2);
+    }
+
     return 1;
 }
 
@@ -99,25 +107,32 @@ void execute_scan_rules(int host_num)
             sprintf(scan_rules[rn].res, "%d", ping_result);
         }
 
-        // These command will be executed on the remote node
         else
         {
-            if (hosts[host_num].login != NULL && hosts[host_num].password != NULL)
-            {
-                sprintf(cmd, "sshpass -p %s ssh -o ConnectTimeout=10 -t %s@%s '%s' 2>/dev/null",
-                    hosts[host_num].password,
-                    hosts[host_num].login,
-                    hosts[host_num].ip,
-                    scan_rules[rn].cmd
-                );
+            // This command will be execute on the local node
+            if (scan_rules[rn].loc == 1) {
+                    sprintf(cmd, "%s", scan_rules[rn].cmd);
             }
-            else
-            {
-                sprintf(cmd, "ssh -o ConnectTimeout=10 -t %s '%s' 2>/dev/null",
-                    hosts[host_num].ip,
-                    scan_rules[rn].cmd
-                );
-            }
+
+            // This command will be executed on the remote node
+            else {
+                if (hosts[host_num].login != NULL && hosts[host_num].password != NULL)
+                {
+                    sprintf(cmd, "sshpass -p %s ssh -o ConnectTimeout=10 -t %s@%s '%s' 2>/dev/null",
+                        hosts[host_num].password,
+                        hosts[host_num].login,
+                        hosts[host_num].ip,
+                        scan_rules[rn].cmd
+                    );
+                }
+                else
+                {
+                    sprintf(cmd, "ssh -o ConnectTimeout=10 -t %s '%s' 2>/dev/null",
+                        hosts[host_num].ip,
+                        scan_rules[rn].cmd
+                    );
+                }
+            };
 
             exec_cmd(cmd, hm_answ, &hm_answ_str_cnt);
 

@@ -114,6 +114,12 @@ void read_cfg()
                         scan_rules[section_i].blk = 1;
                 }
 
+                // BLK field
+                else if (!memcmp(row, "LOC", 3))
+                {
+                    if (!memcmp(&row[4], "1", 1))
+                        scan_rules[section_i].loc = 1;
+                }
         };
     };
 
