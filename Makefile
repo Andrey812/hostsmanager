@@ -2,7 +2,7 @@ SRC_DIR=src/
 OBJ_DIR=obj/
 BIN_DIR=bin/
 
-BIN_NAME=hostmon
+BIN_NAME=hostman
 
 all: src/cmd.c
 	gcc -c $(SRC_DIR)cmd.c -o $(OBJ_DIR)cmd.o

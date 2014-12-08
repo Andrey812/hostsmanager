@@ -35,9 +35,7 @@ int ping(char *host) {
 
     // Parse ping answer
     regex_t regex; //regex for parsing of the ping answer
-    reg_err = regcomp(&regex, "time=", 0);
-    if (reg_err)
-        wlog("Could not compile regex", 1);
+    regcomp(&regex, "time=", 0);
 
     for (str_num = 0; str_num < ping_answ_str_cnt; str_num++)
     {

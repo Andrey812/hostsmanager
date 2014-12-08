@@ -20,7 +20,10 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
     fp = popen(cmd_string, "r");
 
     if (fp == NULL)
-        wlog("Can't execute external program", 0);
+    {
+        sprintf(app.log, "Can't execute external program");
+        wlog(0,0);
+    }
 
     int str_num = 0;
     while (fgets(str, 256, fp) != NULL)
@@ -40,17 +43,16 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
 
     if (status == -1)
     {
-        wlog("Can't close external program", 0);
+        sprintf(app.log, "Can't close external program");
+        wlog(0,0);
         return 0;
     }
 
-    wlog(cmd_string, 2);
-    if (str_num) {
-        wlog(cmd_answ[0], 2);
-    }
-    else {
-        wlog("NO_ANSWER", 2);
-    }
+    // Debug logs for command's flow
+    sprintf(app.log, "CMD SENT:[%s]", cmd_string);
+    wlog(2,0);
+    sprintf(app.log, "ANSWER RECEIVED:[%s]", str_num ? cmd_answ[0] : "");
+    wlog(2,0);
 
     return 1;
 }

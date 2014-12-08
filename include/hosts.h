@@ -1,5 +1,6 @@
 /*
-    Info about hosts for scanner
+    Settings from configuration file
+    (daemon configuration, hosts scan rules)
 */
 
 #define HOSTS_H_INCLUDED
@@ -27,6 +28,19 @@ struct scan_rule
 
 // Up to 32 scanner commands
 struct scan_rule scan_rules[32];
+
+/* Application settings */
+struct settings
+{
+    char pid_path[256];     // Path to the pid file
+    char log_path[256];     // Path to the log file
+    char res_path[256];     // Path to the directory of scan result files
+    char cfg_path[256];     // Path to the main configuration file
+    int scan_period;    // Rate of the scanning cycles (in seconds)
+    int debug;          // If 1 - enable debug records to the log file
+};
+
+struct settings params;
 
 /* Global structure with info about each host */
 void read_cfg();

@@ -1,3 +1,12 @@
 #define FLOW_H_INCLUDED
-void err(char *err_str);
-void wlog(char *log_str, int log_type);
+
+/* Common variables */
+struct flow
+{
+    char log[256];  // Log string
+};
+
+struct flow app;
+
+void err();
+void wlog(int log_type, int to_stdout);

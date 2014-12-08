@@ -13,7 +13,7 @@
 #include "../include/cmd.h"
 #include "../include/hosts.h"
 
-/* Read and parse configuration file. Get info about host IP adresses and names */
+/* Read and parse main configuration file */
 void read_cfg()
 {
     FILE *fp;
@@ -23,10 +23,21 @@ void read_cfg()
                         // 0 - HOSTS, 1 - RULES, 2 - HOST_INFO
     int section_i = 0;  // Record number of the current section
 
-    fp = fopen("rules.cfg", "r");
+    /* Try to use filename from arguments first
+     or use default name of configuration file instead */
+    if (!strlen(params.cfg_path))
+    {
+        sprintf(params.cfg_path, "%s", "hostman.cfg");
+        sprintf(app.log, "Default configuration file '%s' was used", params.cfg_path);
+        wlog(2,0);
+    }
 
-    if (!fp)
-            err("Can't find configuration file: rules.cfg");
+    fp = fopen(params.cfg_path, "r");
+
+    if (!fp) {
+        sprintf(app.log, "Can't open configuration file: %s", params.cfg_path);
+        err();
+    }
 
     // Parse config file
     while (fgets(row, 256, fp)!=NULL)
@@ -53,6 +64,12 @@ void read_cfg()
             section = 2;
             section_i = 0;
         }
+        else if(!memcmp(row, "[SETTINGS]", 10))
+        {
+            section = 3;
+            section_i = 0;
+        }
+
 
         // Section blocks
         else
@@ -91,6 +108,7 @@ void read_cfg()
                 }
 
                 break;
+
             // RULES
             case 1:
                 // CMD field
@@ -120,6 +138,36 @@ void read_cfg()
                     if (!memcmp(&row[4], "1", 1))
                         scan_rules[section_i].loc = 1;
                 }
+
+                break;
+            // SETTINGS
+            case 3:
+
+                if (!memcmp(row, "PID_PATH", 8))
+                {
+                    sprintf(params.pid_path, "%s", &row[9]);
+                }
+
+                else if (!memcmp(row, "LOG_PATH", 8))
+                {
+                    sprintf(params.log_path, "%s", &row[9]);
+                }
+
+                else if (!memcmp(row, "RES_PATH", 8))
+                {
+                    sprintf(params.res_path, "%s", &row[9]);
+                }
+
+                else if (!memcmp(row, "SCAN_PERIOD", 11))
+                {
+                    params.scan_period = atoi(&row[12]);
+                }
+
+                else if (!memcmp(row, "DEBUG", 5))
+                {
+                    if (!memcmp(&row[6], "1", 1))
+                        params.debug = 1;
+                }
         };
     };
 
@@ -147,7 +195,7 @@ void clean_hosts_info()
     char *exec_answ[32];
     int exec_answ_str_cnt = 0;
 
-	exec_cmd("rm *.info", exec_answ, &exec_answ_str_cnt);
+	exec_cmd("rm *.info 2>/dev/null", exec_answ, &exec_answ_str_cnt);
 }
 
 /* Refresh host info using received values */
