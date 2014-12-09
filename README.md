@@ -1,4 +1,4 @@
-hostsmanager
+Hostsmanager
 ============
 This tool includes two applications:
 
