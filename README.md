@@ -50,7 +50,7 @@ and fields for the recording of the answers
 
 All sections well documented with examples in the hostman.cfg file.
 
-When hostman runned it try to find hostman.cfg file in the same directory
+When hostman was executed it tries to find hostman.cfg file in the same directory
 from which it was executed. You can use key -c <path_to_the_config> for reassign
 hostman to the other configuration file.
 
