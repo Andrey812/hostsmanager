@@ -76,3 +76,12 @@ configuration file).
 
 "info" file for each host will be rewritten in the time of next daemon's iteration.
 All *.info files will be deleted when daemon executes again
+
+Limitations
+-----------
+
+* Daemon parses only first line of the answer from host
+* String of the answer from host length must be less than 256 chars
+* The list of the hosts up to 16 items
+* The list of the scanning rules up to 32 items
+* Scaner queries only 1 host per round (with 1 thread)

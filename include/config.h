@@ -1,9 +1,10 @@
 /*
-    Settings from configuration file
-    (daemon configuration, hosts scan rules)
+    Module for working with files:
+    hostman.cfg - main configuration file
+    <host_id>.info - scanner results by host
 */
 
-#define HOSTS_H_INCLUDED
+#define CONFIG_H_INCLUDED
 
 /* List of the hosts for scanning and their params */
 struct host
@@ -42,7 +43,6 @@ struct settings
 
 struct settings params;
 
-/* Global structure with info about each host */
 void read_cfg();
 void save_host_info(int);
 void clean_hosts_info();

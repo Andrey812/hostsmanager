@@ -1,6 +1,5 @@
 /*
-    The library provides functions for reading and writing
-	configuration files
+    The library provides functions for reading and writing configuration files
 */
 
 #include <stdio.h>
@@ -11,7 +10,7 @@
 
 #include "../include/flow.h"
 #include "../include/cmd.h"
-#include "../include/hosts.h"
+#include "../include/config.h"
 
 /* Read and parse main configuration file */
 void read_cfg()

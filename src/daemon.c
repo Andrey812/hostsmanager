@@ -12,7 +12,7 @@
 
 #include "../include/flow.h"
 #include "../include/cmd.h"
-#include "../include/hosts.h"
+#include "../include/config.h"
 
 /* Display short help and exit */
 void show_help()
