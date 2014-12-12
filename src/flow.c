@@ -59,7 +59,7 @@ void wlog(int log_type, int to_stdout)
     char dt[32];
     datetime(dt);
 
-    fp = fopen("hostman.log", "a");
+    fp = fopen(params.log_path, "a");
     fprintf(fp, "%s %s %s\n", dt, type, app.log);
     fclose(fp);
 

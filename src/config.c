@@ -170,6 +170,34 @@ void read_cfg()
         };
     };
 
+    // Warinings
+    if (!strlen(params.pid_path))
+    {
+        sprintf(params.pid_path, "hostman.pid");
+        sprintf(app.log, "Pid path was not defined. Current path will be used. File: hostman.pid.");
+        wlog(2,0);
+    };
+
+    if (!strlen(params.log_path))
+    {
+        sprintf(params.log_path, "hostman.log");
+        sprintf(app.log, "Log path was not defined. Current path will be used. File: hostman.log");
+        wlog(2,0);
+    };
+
+    if (!strlen(params.res_path))
+    {
+        sprintf(app.log, "Res path was not defined. Current path will be used. Files: <host_id>.info");
+        wlog(2,0);
+    }
+    else {
+        // Add "/" at the end of path if there is no such char
+        if (params.res_path[strlen(params.res_path)-1] != '/') {
+            sprintf(params.res_path, "%s/", params.res_path);
+        }
+    }
+
+
     fclose(fp);
 }
 
@@ -178,8 +206,16 @@ void save_host_info(int host_id)
 {
     FILE *fp;
 
-    char filename[16];
-    sprintf(filename, "host_%d.info", host_id);
+    char filename[256];
+
+    if (strlen(params.res_path))
+    {
+        sprintf(filename, "%shost_%d.info", params.res_path, host_id);
+    }
+    else
+    {
+        sprintf(filename, "host_%d.info", host_id);
+    };
 
     fp = fopen(filename, "w");
 
@@ -191,10 +227,21 @@ void save_host_info(int host_id)
 /* Delete all hosts files */
 void clean_hosts_info()
 {
+    char cmd[284];
     char *exec_answ[32];
+
+    if (strlen(params.res_path))
+    {
+        sprintf(cmd, "rm %s*.info 2>/dev/null", params.res_path);
+    }
+    else
+    {
+        sprintf(cmd, "rm %s*.info 2>/dev/null", params.res_path);
+    };
+
     int exec_answ_str_cnt = 0;
 
-	exec_cmd("rm *.info 2>/dev/null", exec_answ, &exec_answ_str_cnt);
+	exec_cmd(cmd, exec_answ, &exec_answ_str_cnt);
 }
 
 /* Refresh host info using received values */

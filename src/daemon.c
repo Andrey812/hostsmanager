@@ -33,13 +33,6 @@ void show_help()
  */
 int is_pid_file_locked()
 {
-    if (!strlen(params.pid_path))
-    {
-        sprintf(params.pid_path, "hostman.pid");
-        sprintf(app.log, "No record about pid path in the configuration. Default path 'hostman.pid' was used.");
-        wlog(2,0);
-    };
-
     int pid_file = open(params.pid_path, O_CREAT | O_RDWR, 0666);
 
     int rc = flock(pid_file, LOCK_EX | LOCK_NB);
