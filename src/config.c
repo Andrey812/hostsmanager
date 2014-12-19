@@ -19,7 +19,7 @@ void read_cfg()
 
     char row[256];      // Current row of the config file
     int section = 0;    // Current sections of the configuration file
-                        // 0 - HOSTS, 1 - RULES, 2 - HOST_INFO
+                        // 0 - HOSTS, 1 - RULES, 2 - HOST_INFO 3 - SETTINGS
     int section_i = 0;  // Record number of the current section
 
     /* Try to use filename from arguments first

@@ -40,6 +40,10 @@ void wlog(int log_type, int to_stdout)
     if(to_stdout == 1)
         printf("%s\n", app.log);
 
+    // params.log_path can be undefined when config was not loaded
+    if(!strlen(params.log_path))
+        return;
+
     FILE *fp;
 
     char type[8];
