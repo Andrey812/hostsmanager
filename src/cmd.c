@@ -11,14 +11,6 @@
 #include "../include/config.h"
 #include "../include/builtin_cmd.h"
 
-/* Remove line wrap in the end of the string */
-void ln_wrp_del(char *str)
-{
-    int len = strlen(str);
-    if (str[len-1] == '\n')
-        str[len-1] = '\0';
-}
-
 /* Execute external command and return array of strings with answer */
 int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
     FILE *fp;
@@ -57,10 +49,6 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
     }
 
     // Debug logs for command's flow
-
-    // Remove last line wrapper if exists
-    if (str_num)
-        ln_wrp_del(cmd_answ[0]);
 
     // Save logs
     sprintf(app.log, "CMD SENT:[%s]", cmd_string);
