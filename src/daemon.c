@@ -122,6 +122,9 @@ void main(int argc, char **argv)
 
 	while(1)
 	{
+        sprintf(app.log, "Scanning iteration started.");
+        wlog(2,0);
+
 		int host_num = 0;
 		while(hosts[host_num].ip != NULL)
 		{
@@ -130,6 +133,17 @@ void main(int argc, char **argv)
 
 			host_num++;
 		};
+
+        sprintf(app.log, "Scanning iteration finished.");
+        wlog(2,0);
+
+        if (params.scan_period > 0)
+        {
+            sprintf(app.log, "Waiting %d seconds for the next scanning iteration", params.scan_period);
+            wlog(2,0);
+
+            sleep(params.scan_period);
+        };
 	};
     sprintf(app.log, "Daemon has finished work");
     wlog(1,0);

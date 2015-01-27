@@ -53,7 +53,7 @@ int exec_cmd(char *cmd_string, char *cmd_answ[], int *answ_str_cnt) {
     // Save logs
     sprintf(app.log, "CMD SENT:[%s]", cmd_string);
     wlog(2,0);
-    sprintf(app.log, "ANSWER RECEIVED:[%s]", str_num ? cmd_answ[0] : "");
+    sprintf(app.log, "ANSWER RECEIVED:[%s]", str_num ? cmd_answ[0] : "EMPTY_ANSWER");
     wlog(2,0);
 
     return 1;
@@ -98,6 +98,9 @@ void execute_scan_rules(int host_num)
     char *hm_answ[256]; // Array of the strings
     int hm_answ_str_cnt;
     int mem_clr_i;
+
+    sprintf(app.log, "Scanning of the host %d (IP: %s) started.", host_num, hosts[host_num].ip);
+    wlog(2,0);
 
 	while(scan_rules[rn].cmd != NULL)
     {
@@ -163,4 +166,7 @@ void execute_scan_rules(int host_num)
 
         rn++;
     };
+
+    sprintf(app.log, "Scanning of the host %d (IP: %s) finished.", host_num, hosts[host_num].ip);
+    wlog(2,0);
 }
