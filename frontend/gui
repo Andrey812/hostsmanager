@@ -7,6 +7,9 @@ use 5.010;
 
 use Gtk2;
 use Gtk2::SimpleList;
+use Glib;
+
+my $gui_ref_period = 5000; # (ms)
 
 my $config_file = $ARGV[0] // 'hostman.cfg';
 
@@ -22,7 +25,6 @@ $window->set_title("Hosts manager");
 $window->set_border_width(5);
 $window->signal_connect(delete_event => \&delete_event);
 
-
 my ($res_path, $fields) = get_config_settings();
 
 # List
@@ -34,15 +36,23 @@ my $hosts_list_frame = Gtk2::Frame->new('Hosts');
 # Add Hosts list to frame
 $hosts_list_frame->add($hosts_list);
 
-$window->add($hosts_list_frame);
+# Button 'Refresh'
+#my $button = Gtk2::Button->new('Refresh');
+#$button->signal_connect("clicked" => \&callback, "Refresh");
+#$hosts_list_frame->add($button);
+
+my $box = Gtk2::VBox->new(0, 10);
+$box->pack_start($hosts_list_frame, 1, 1, 10);
+#$box->pack_start($button, 0, 0, 10);
+$window->add($box);
+
 $window->show_all;
 
 my $hosts = collect_hosts_info();
-
-use Data::Dumper;
-warn Dumper($hosts);
-
 display_hosts_info($hosts_list, $hosts, $fields);
+
+# Timer
+Glib::Timeout->add (2000, \&callback);
 
 Gtk2->main;
 
@@ -52,9 +62,12 @@ exit(0);
 sub display_hosts_info {
     my ($hosts_list, $hosts_info, $fields) = @_;
 
-    foreach my $host_id (sort keys %$hosts_info) {
+    my $host_num = 0;
+    foreach my $host_id (sort {$a cmp $b} keys %$hosts_info) {
+
         my $host = $hosts_info->{$host_id};
-        $hosts_list->{data}->[$host_id] = [
+
+        $hosts_list->{data}->[$host_num++] = [
             map {
                 my $val = $host->{$_->{name}} // "";
 
@@ -149,6 +162,10 @@ sub get_config_settings {
         # Parse strings from SETTINGS section
         elsif($section eq "SETTINGS") {
             $res_path = $1 if ($row =~ /^RES_PATH=(.*)$/);
+
+            if ($row =~ /^GUI_REF_PERIOD=(.*)$/) {
+                $gui_ref_period = $1 * 1000;
+            };
         }
     }
 
@@ -179,4 +196,11 @@ sub failed {
     say "Error.\n$err_txt\nSyntax: gui [hostman_cfg_file]";
 
     exit(1);
+}
+
+sub callback {
+    my $hosts = collect_hosts_info();
+    display_hosts_info($hosts_list, $hosts, $fields);
+
+    return 1;
 }
